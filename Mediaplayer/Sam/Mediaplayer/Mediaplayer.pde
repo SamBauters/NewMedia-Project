@@ -73,6 +73,10 @@ void draw()
   
   showOtherScreenElements();
   
+  if (!noSongFound) {
+    showMeta();
+  }
+  
   if(!noSongFound)
   {
     try
@@ -291,7 +295,7 @@ void getCurrentSong()
       // an FFT needs to know how
       //long the audio buffer it will be analyzing are
       //and also needs to know the sample rate of the audio it is analyzing
-      fft = new FFT(song.bufferSize(),song.sampleRate());
+       fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
     }else
     {
