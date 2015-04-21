@@ -102,11 +102,15 @@ void mousePressed()
     command(buttonProgressFrame.commandNumber);
   }else if(buttonNext.over())
   {
-    command(buttonNext.commandNumber);
+     command(buttonNext.commandNumber);
   }else if(buttonPrevious.over())
   {
     command(buttonPrevious.commandNumber);
-  }else{
+  }else if (buttonFolder.over()) {
+    command(buttonFolder.commandNumber);
+  }
+  
+  else{
     println("not found");
   }
 }
@@ -187,7 +191,7 @@ void showOtherScreenElements()
     
     try
     {
-      text("Played" + strFromMillis(song.position()) + " of " + strFromMillis(songLength)+".",30,30);
+      text("Played "+ strFromMillis(song.position())+ " of "+ strFromMillis(songLength) + ".",30, 30);
       if(!song.isPlaying())
       {
         fill(255);
@@ -226,7 +230,8 @@ void command(int commandNumber)
     break;
     
     case 1:
-    int newSongPosition = int(map(mouseX,buttonProgressFrame.x,buttonProgressFrame.x+buttonProgressFrame.w,0,songLength));
+     int newSongPosition = int(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
+     song.cue(newSongPosition);
     break;
     
     case 2:
@@ -280,6 +285,7 @@ void getCurrentSong()
       noSongFound = false;
       println(namesFiles[indexFile]);
       song = minim.loadFile(namesFiles[indexFile]); //pathGlobal + "\\ + songLength=song.length();
+      songLength=song.length();
       //load meta
       meta = song.getMetaData();
       // an FFT needs to know how
