@@ -4,6 +4,24 @@ import ddf.minim.*;
 import ddf.minim.analysis.*;
 import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
+
+import java.io.*;
+import java.awt.image.BufferedImage;
+//
+//
+import java.awt.BorderLayout;
+import java.awt.image.BufferedImage;
+import java.io.ByteArrayInputStream;
+
+import java.io.FileInputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+
+import javax.imageio.ImageIO;
+import javax.swing.ImageIcon;
+import javax.swing.JFrame;
+import javax.swing.JLabel;
  
  
  //Songs
@@ -13,6 +31,8 @@ AudioMetaData meta;
 int songLength=0;
 boolean paused=false;
 boolean noSongFound=false;
+PImage mp3Image;  // show cover image from MP3
+boolean showMp3Image = true; 
 
 //Buttons
 Button buttonPause;
@@ -34,7 +54,10 @@ FFT fft;
  
 void setup()
 {
-  size(500, 500);
+  size(displayWidth, displayHeight);
+    if (frame != null) {
+    frame.setResizable(true);
+  }
   
   minim = new Minim(this);
   getFolder();
@@ -92,6 +115,12 @@ void draw()
     }
   }
   
+    if (showMp3Image) {
+    if (mp3Image!=null) {
+      image(mp3Image, width-mp3Image.width, height-mp3Image.height);
+    }
+  }
+  
   checkMouseOver();
 }
 
@@ -139,6 +168,17 @@ void keyPressed()
     command(buttonFolder.commandNumber);
     break;
     
+    case 'i':
+    // show image from MP3 when available
+    tryToShowCoverImage();
+    showMp3Image=true;
+    break;
+    
+    case 'I':
+    showMp3Image=false;
+    break;  
+    
+    
     default:
     break;
   }
@@ -163,10 +203,10 @@ void checkMouseOver()
     }else if(buttonFolder.over())
     {
       buttonFolder.showMouseOver();
-    }else
+    }/*else
     {
       println("not found 2");
-    }
+    }*/
   }else
   {
     if(buttonFolder.over())
@@ -371,6 +411,7 @@ void getCurrentSong()
     else
     {
       noSongFound = false;
+      tryToShowCoverImage();
     }
   }
   
