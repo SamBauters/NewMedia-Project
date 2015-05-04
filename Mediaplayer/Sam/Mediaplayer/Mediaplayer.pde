@@ -42,6 +42,9 @@ Button buttonPrevious;
 Button buttonNext;
 Button buttonFolder;
 
+//Visuals
+Visual1 visual1;
+
 //Files
 String pathGlobal="";
 String[] namesFiles; //Songs in folder
@@ -122,6 +125,8 @@ void draw()
   }
   
   checkMouseOver();
+
+  visual1.display();
 }
 
 void mousePressed()
@@ -220,7 +225,7 @@ void showOtherScreenElements()
 {
   if(!noSongFound)
   {
-    if(!(fft==null))
+    /*if(!(fft==null))   //STANDAARD visual
     {
       fft.forward(song.mix);
       stroke(255,0,0,128);
@@ -228,8 +233,10 @@ void showOtherScreenElements()
       for(int i = 0; i<fft.specSize(); i++)
       {
         line(i,height,i,height - fft.getBand(i)*4);
+        line(width-i,height,width-i,height - fft.getBand(i)*4);
       }
     }
+    */
     
     fill(255);
     
@@ -337,6 +344,7 @@ void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
+      visual1 = new Visual1(song);
     }else
     {
       println("not ok" + namesFiles[indexFile]);
@@ -436,6 +444,7 @@ void getCurrentSong()
   
   void showMeta()
   {
+  	rectMode(CORNER);
     int ys = 115; //start pos
     int yi = 16; //y line diff.
     
@@ -449,7 +458,7 @@ void getCurrentSong()
       textTab("Author: \t" + meta.author(), 5, y+=yi);
       textTab("Album: \t" + meta.album(), 5, y+=yi);
       textTab("Date: \t" + meta.date(), 5, y+=yi);
-      textTab("Comment: \t" + meta.comment(), 5, y+=yi);
+      
        try {
          // textTab("Track:   \t  " + meta.track(), 5, y+=yi);
        }
@@ -466,9 +475,10 @@ void getCurrentSong()
     textTab("Orchestra: \t" + meta.orchestra(), 5, y+=yi);
     textTab("Publisher: \t" + meta.publisher(), 5, y+=yi);
     textTab("Encoded: \t" + meta.encoded(), 5, y+=yi);
+    textTab("Comment: \t" + meta.comment(), 5, y+=yi);
   }
-  textTab("Folder:\t" +  pathGlobal, 5, y+=yi);
-  textTab("In folder:\t" +"song " + str(indexFile+1) + " of " + namesFiles.length + ".", 5,y+=yi);
+  /*textTab("Folder:\t" +  pathGlobal, 5, y+=yi);
+  textTab("In folder:\t" +"song " + str(indexFile+1) + " of " + namesFiles.length + ".", 5,y+=yi);*/
   }
   
   String showSongWithoutFolder()
@@ -540,73 +550,4 @@ void getCurrentSong()
     song.close();
     minim.stop();
     super.stop();
-  }
-  
-  class Button
-  {
-    float x; //pos
-    float y;
-    float w=0; //size
-    float h=0;
-    
-    //color
-    boolean hasColorFill = true; //if it has filling
-    color colorFill; //what it is
-  
-  boolean hasColorStroke=true; //if it has an outline
-  color colorStroke;
-  String text ="";
-  String textMouseOver="";
-  int commandNumber;
-
-  Button(float x_, float y_, float w_, float h_, boolean hasColorFill_, color cFill_, boolean hasColorStroke_, color cStroke_, String text_, String textMouseOver_, int commandNumber_) { x=x_;  y=y_;  w=w_; h=h_;
-  //color fill
-   hasColorFill=hasColorFill_;
-   colorFill=cFill_;
-   //color stroke
-   hasColorStroke = hasColorStroke_;
-   colorStroke = cStroke_;
-   
-   text=text_;
-   textMouseOver=textMouseOver_;
-   commandNumber=commandNumber_;
-  }
-  
-  void display()
-  {
-    if(hasColorFill)
-      fill(colorFill);
-    else
-      noFill();
-    if(hasColorStroke)
-      stroke(colorStroke);
-    else
-      noStroke();
-      rect(x,y,w,h);
-      fill(255);
-      text(text, x+8,y+12);
-  }
-  
-  boolean over()
-  {
-    return (mouseX>x && mouseX<x+w&& mouseY>y&&mouseY<y+h);
-  }
-  
-  void showMouseOver()
-  {
-    //Yellow mouse over help text
-    if(!textMouseOver.equals(""))
-    {
-      float pos=x; // or mouseX;
-      //right screen border?
-      if(pos+textWidth(textMouseOver)+10>width)
-      {
-        pos=width-textWidth(textMouseOver)-12;
-      }
-    fill(255,255,44);
-    rect(pos,y+h+14, textWidth(textMouseOver)+2,20);
-    fill(0);
-    text(textMouseOver, pos+2, y+48);
-    }
- }
   }
