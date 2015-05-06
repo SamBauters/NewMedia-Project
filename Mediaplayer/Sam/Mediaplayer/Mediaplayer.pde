@@ -5,14 +5,12 @@ import ddf.minim.analysis.*;
 import ddf.minim.ugens.*;
 import ddf.minim.effects.*;
 
-import java.io.*;
 import java.awt.image.BufferedImage;
-//
-//
 import java.awt.BorderLayout;
 import java.awt.image.BufferedImage;
-import java.io.ByteArrayInputStream;
 
+import java.io.*;
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +38,6 @@ Button buttonProgressFrame;
 Button buttonProgressData;
 Button buttonPrevious;
 Button buttonNext;
-Button buttonFolder;
 
 //Visuals
 Visual1 visual1;
@@ -59,22 +56,21 @@ void setup()
 {
   size(displayWidth, displayHeight);
     if (frame != null) {
-    frame.setResizable(true);
+    frame.setResizable(false);
   }
   
   minim = new Minim(this);
   getFolder();
   
   //Define Buttons
-  buttonPause = new Button(width/2-10,65,20,20,false,color(0),true,color(255),"||","Pause/Play",0);
-  buttonProgressFrame = new Button(10,40,width-20,20,false, color(0),true,color(255),"","Click to set play position",1);
-  buttonProgressData = new Button(12,42,0,17,true,color(222,1,1),false,color(255),"","",-1);
-  buttonPrevious = new Button(width/2-70,65,20,20,false,color(0),true,color(255),"|<","Previous song",2);
-  buttonNext = new Button(width/2+50,65,20,20,false,color(0),true,color(255),">|","Next song",3);
-  buttonFolder = new Button(width-30,65,20,20,false,color(0),true,color(255),"v","Open folder",4);
+  buttonProgressData = 	new Button(0,				height-100,		0,			100,		"",			0,			0,-1); 						//move progress
+  buttonProgressFrame = new Button(0,				height-100,		width,		100, 		"",			0,			0,	1); //frame Click to set play position
+  
+  buttonPrevious = 		new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-85,2);//Previous song
+  buttonPause = 		new Button(width/3,			height/2-200,	width/3,	height/2,	"play.png",	width/2-50,	height/2-85,0); //Pause/Play
+  buttonNext = 			new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-210,	height/2-85,3);//Next song
+
   getCurrentSong();
-  
-  
 }
  
 void draw()
@@ -84,14 +80,14 @@ void draw()
   if(noSongFound)
   {
     fill(255);
-    textTab("No song found in \n" + pathGlobal + "\nPlease use open folder to change folder",20,20);
+    textTab("No song found in \n" + pathGlobal,20,20);
   }
   
   if(!noSongFound)
   {
     buttonProgressFrame.display();
     if(!(meta==null))
-    buttonProgressData.w = map(song.position(),0,meta.length(),0,width-24);
+    buttonProgressData.w = map(song.position(),0,meta.length(),0,width);
     buttonProgressData.display();
     
     buttonPause.display();
@@ -120,7 +116,7 @@ void draw()
   
     if (showMp3Image) {
     if (mp3Image!=null) {
-      image(mp3Image, width-mp3Image.width, height-mp3Image.height);
+      image(mp3Image, width-mp3Image.width, 0);
     }
   }
   
@@ -144,8 +140,6 @@ void mousePressed()
   }else if(buttonPrevious.over())
   {
     command(buttonPrevious.commandNumber);
-  }else if (buttonFolder.over()) {
-    command(buttonFolder.commandNumber);
   }
   
   else{
@@ -167,10 +161,6 @@ void keyPressed()
     
     case 'p':
     command(buttonPrevious.commandNumber);
-    break;
-    
-    case 'o':
-    command(buttonFolder.commandNumber);
     break;
     
     case 'i':
@@ -205,19 +195,40 @@ void checkMouseOver()
     }else if(buttonPrevious.over())
     {
       buttonPrevious.showMouseOver();
-    }else if(buttonFolder.over())
+    }
+    else if(mouseX>width-mp3Image.width && mouseY<mp3Image.height)
     {
-      buttonFolder.showMouseOver();
-    }/*else
+    	rectMode(CORNER);
+	    int ys = 50; //start pos
+	    int yi = 16; //y line diff.
+	    
+	    int y = ys;
+	    fill(255);
+	    if(!(meta==null))
+	    {
+	    	textTab("Length: \t" + strFromMillis(meta.length()), 35, y+=yi);
+		    textTab("Title: \t" + meta.title(), 35, y+=yi);
+		    textTab("Author: \t" + meta.author(), 35, y+=yi);
+		    textTab("Album: \t" + meta.album(), 35, y+=yi);
+		    textTab("Date: \t" + meta.date(), 35, y+=yi);
+		    textTab("Genre:\t" + meta.genre(), 35, y+=yi);
+		    textTab("Copyright:  \t" + meta.copyright(), 35, y+=yi);
+		    textTab("Disc: \t" + meta.disc(), 35, y+=yi);
+		    textTab("Composer: \t" + meta.composer(), 35, y+=yi);
+		    textTab("Orchestra: \t" + meta.orchestra(), 35, y+=yi);
+		    textTab("Publisher: \t" + meta.publisher(), 35, y+=yi);
+		    textTab("Encoded: \t" + meta.encoded(), 35, y+=yi);
+		    textTab("Comment: \t" + meta.comment(), 35, y+=yi);
+	  	}
+    }
+    /*else
     {
       println("not found 2");
     }*/
-  }else
+  }
+  else
   {
-    if(buttonFolder.over())
-    {
-      buttonFolder.showMouseOver();
-    }
+  	//no songs found in folder	
   }
 }
 
@@ -225,7 +236,7 @@ void showOtherScreenElements()
 {
   if(!noSongFound)
   {
-    /*if(!(fft==null))   //STANDAARD visual
+    /*if(!(fft==null))   										//STANDAARD visual
     {
       fft.forward(song.mix);
       stroke(255,0,0,128);
@@ -242,23 +253,28 @@ void showOtherScreenElements()
     
     try
     {
-      text("Played "+ strFromMillis(song.position())+ " of "+ strFromMillis(songLength) + ".",30, 30);
-      if(!song.isPlaying())
-      {
-        fill(255);
-        text("pause",width/2-17,54);
-      }
-    }catch(Exception e)
-    {
-      e.printStackTrace();
-    }
-    finally{
-    }
+    	textSize(26);
+      	text(strFromMillis(song.position()),map(song.position(),0,meta.length(),0,width)-20, height-115);
+      	text(strFromMillis(songLength), width-75, height-55);
+      	textSize(14);
+
+	    if(!song.isPlaying())
+	    {
+	      fill(255);
+	      text("pause",width/2-17,54);
+	    }
+	}
+	catch(Exception e)
+	{
+	    e.printStackTrace();
+	}
+	finally
+	{}
     
     buttonPrevious.display();
     buttonNext.display();
   }
-  buttonFolder.display();
+
 }
 
 void command(int commandNumber)
@@ -270,13 +286,11 @@ void command(int commandNumber)
     {
       song.pause();
       paused = true;
-      buttonPause.text=">";
     }
     else
     {
       song.play();
       paused=false;
-      buttonPause.text="||";
     }
     break;
     
@@ -444,41 +458,13 @@ void getCurrentSong()
   
   void showMeta()
   {
-  	rectMode(CORNER);
-    int ys = 115; //start pos
-    int yi = 16; //y line diff.
-    
-    int y = ys;
-    fill(255);
+    //fill(255);
     if(!(meta==null))
     {
-      textTab("File Name: \t" + showSongWithoutFolder(), 5, y);
-      textTab("Length: \t" + strFromMillis(meta.length()), 5, y+=yi);
-      textTab("Title: \t" + meta.title(), 5, y+=yi);
-      textTab("Author: \t" + meta.author(), 5, y+=yi);
-      textTab("Album: \t" + meta.album(), 5, y+=yi);
-      textTab("Date: \t" + meta.date(), 5, y+=yi);
-      
-       try {
-         // textTab("Track:   \t  " + meta.track(), 5, y+=yi);
-       }
-    catch (ArrayIndexOutOfBoundsException e) 
-    { // to do ???
-      System.err.println("Caught ArrayIndexOutOfBoundsException:      " +  e.getMessage());
-    } finally{
-      //do nothing
-    };
-    textTab("Genre:\t" + meta.genre(), 5, y+=yi);
-    textTab("Copyright:  \t" + meta.copyright(), 5, y+=yi);
-    textTab("Disc: \t" + meta.disc(), 5, y+=yi);
-    textTab("Composer: \t" + meta.composer(), 5, y+=yi);
-    textTab("Orchestra: \t" + meta.orchestra(), 5, y+=yi);
-    textTab("Publisher: \t" + meta.publisher(), 5, y+=yi);
-    textTab("Encoded: \t" + meta.encoded(), 5, y+=yi);
-    textTab("Comment: \t" + meta.comment(), 5, y+=yi);
-  }
-  /*textTab("Folder:\t" +  pathGlobal, 5, y+=yi);
-  textTab("In folder:\t" +"song " + str(indexFile+1) + " of " + namesFiles.length + ".", 5,y+=yi);*/
+    	textSize(26);
+	    textTab(showSongWithoutFolder(), 10, 35);
+	    textSize(12);
+  	}
   }
   
   String showSongWithoutFolder()

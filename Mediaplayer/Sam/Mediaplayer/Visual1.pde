@@ -27,7 +27,7 @@ void display()
   fill(-1, 10);
   if (beat.isOnset()) rad = rad*0.9;
   else rad = 70;
-  ellipse(0, 0, 2*rad, 2*rad);
+  //ellipse(0, 0, 2*rad, 2*rad);
   stroke(-1, 50);
   int bsize = player.bufferSize();
   for (int i = 0; i < bsize - 1; i+=5)

@@ -1,46 +1,49 @@
 class Button
-  {
-    float x; //pos
-    float y;
-    float w=0; //size
-    float h=0;
-    
-    //color
-    boolean hasColorFill = true; //if it has filling
-    color colorFill; //what it is
+{
+  float x; //pos
+  float y;
+  float w=0; //size
+  float h=0;
   
-  boolean hasColorStroke=true; //if it has an outline
+  //color
+  PImage img;
+  float imgX;
+  float imgY; 
+  
   color colorStroke;
-  String text ="";
-  String textMouseOver="";
   int commandNumber;
 
-  Button(float x_, float y_, float w_, float h_, boolean hasColorFill_, color cFill_, boolean hasColorStroke_, color cStroke_, String text_, String textMouseOver_, int commandNumber_) { x=x_;  y=y_;  w=w_; h=h_;
-  //color fill
-   hasColorFill=hasColorFill_;
-   colorFill=cFill_;
-   //color stroke
-   hasColorStroke = hasColorStroke_;
-   colorStroke = cStroke_;
-   
-   text=text_;
-   textMouseOver=textMouseOver_;
-   commandNumber=commandNumber_;
+  Button(float x_, float y_, float w_, float h_, String imgName_, float imgX_, float imgY_, int commandNumber_) 
+  { 
+    //position
+    x=x_;  y=y_;  w=w_; h=h_;
+    imgX = imgX_;
+    imgY = imgY_;
+
+    //image
+    if(imgName_!="")
+    {
+      img = loadImage(imgName_);
+    }
+     
+    commandNumber=commandNumber_;
   }
   
   void display()
   {
-    if(hasColorFill)
-      fill(colorFill);
-    else
-      noFill();
-    if(hasColorStroke)
-      stroke(colorStroke);
-    else
-      noStroke();
+    noStroke();
+    if(img!=null)
+    {
+      tint(255, 63);  // Apply transparency without changing color
+      image(img, imgX, imgY);
+      tint(255, 255);
+    }
+    else 
+    {
+      fill(255,63);
       rect(x,y,w,h);
       fill(255);
-      text(text, x+8,y+12);
+    }
   }
   
   boolean over()
@@ -50,19 +53,29 @@ class Button
   
   void showMouseOver()
   {
-    //Yellow mouse over help text
-    if(!textMouseOver.equals(""))
+    if(img!=null)
     {
-      float pos=x; // or mouseX;
-      //right screen border?
-      if(pos+textWidth(textMouseOver)+10>width)
-      {
-        pos=width-textWidth(textMouseOver)-12;
-      }
-    fill(255,255,44);
-    rect(pos,y+h+14, textWidth(textMouseOver)+2,20);
-    fill(0);
-    text(textMouseOver, pos+2, y+48);
+      tint(255, 63);  // Apply transparency without changing color
+      image(img, imgX, imgY);
+      tint(255, 255);
     }
- }
+    else 
+    {
+      fill(255,30);
+      rect(x,y,mouseX,h);
+      fill(255);
+    }
+    
+    if(commandNumber==2)
+    {
+      fill(255,30);
+      rect(0,0,width/5,height-100);
+    }
+    else if(commandNumber==3)
+    {
+      fill(255,30);
+      rect(width-width/5,0,width/5,height-100);
+    }
+
   }
+}
