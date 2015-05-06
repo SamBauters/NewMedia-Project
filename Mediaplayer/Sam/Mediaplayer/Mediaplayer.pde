@@ -204,22 +204,13 @@ void checkMouseOver()
 	    
 	    int y = ys;
 	    fill(255);
-	    if(!(meta==null))
+	    /*if(!(meta==null))
 	    {
-	    	textTab("Length: \t" + strFromMillis(meta.length()), 35, y+=yi);
-		    textTab("Title: \t" + meta.title(), 35, y+=yi);
-		    textTab("Author: \t" + meta.author(), 35, y+=yi);
-		    textTab("Album: \t" + meta.album(), 35, y+=yi);
-		    textTab("Date: \t" + meta.date(), 35, y+=yi);
+	    	textTab("Duur: \t" + strFromMillis(meta.length()), 35, y+=yi);
+		    textTab("Titel: \t" + meta.title(), 35, y+=yi);
+		    textTab("Artiest: \t" + meta.author(), 35, y+=yi);
 		    textTab("Genre:\t" + meta.genre(), 35, y+=yi);
-		    textTab("Copyright:  \t" + meta.copyright(), 35, y+=yi);
-		    textTab("Disc: \t" + meta.disc(), 35, y+=yi);
-		    textTab("Composer: \t" + meta.composer(), 35, y+=yi);
-		    textTab("Orchestra: \t" + meta.orchestra(), 35, y+=yi);
-		    textTab("Publisher: \t" + meta.publisher(), 35, y+=yi);
-		    textTab("Encoded: \t" + meta.encoded(), 35, y+=yi);
-		    textTab("Comment: \t" + meta.comment(), 35, y+=yi);
-	  	}
+	  	}*/
     }
     /*else
     {
@@ -261,7 +252,7 @@ void showOtherScreenElements()
 	    if(!song.isPlaying())
 	    {
 	      fill(255);
-	      text("pause",width/2-17,54);
+	      text("Gepauzeerd",width/2-17,54);
 	    }
 	}
 	catch(Exception e)
@@ -364,7 +355,7 @@ void getCurrentSong()
       println("not ok" + namesFiles[indexFile]);
     }
     }else{
-    println("No song found at all - not ok");
+    println("Geen nummers gevonden - not ok");
     noSongFound = true;
     }
   }
@@ -477,7 +468,8 @@ void getCurrentSong()
       return "?";
     } else
     {
-      return meta.fileName().substring(pathGlobal.length() + 1);  
+      //return meta.fileName().substring(pathGlobal.length() + 1); 
+      return meta.author() + " - " + meta.title();
     }
   }
   
