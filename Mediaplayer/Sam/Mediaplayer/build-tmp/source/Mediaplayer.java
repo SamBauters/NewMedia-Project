@@ -22,6 +22,11 @@ import javax.imageio.ImageIO;
 import javax.swing.ImageIcon; 
 import javax.swing.JFrame; 
 import javax.swing.JLabel; 
+import com.leapmotion.leap.Gesture.State; 
+import com.leapmotion.leap.Gesture.State; 
+import com.leapmotion.leap.ScreenTapGesture; 
+import com.onformative.leap.*; 
+import com.leapmotion.leap.*; 
 import ddf.minim.*; 
 import ddf.minim.analysis.*; 
 
@@ -59,6 +64,11 @@ public class Mediaplayer extends PApplet {
 
 
  
+
+
+
+
+
  
  //Songs
 Minim minim;
@@ -88,27 +98,80 @@ int indexFile=0; //Current song
 //Frequence display
 FFT fft;
 
+//leap motion
+LeapMotionP5 leap;
+int x, y;
+int timePassed;
+boolean next = false;
+boolean prev = false;
+boolean pausee = false;
 
  
 public void setup()
 {
-  size(displayWidth, displayHeight);
-    if (frame != null) {
-    frame.setResizable(false);
-  }
-  
-  minim = new Minim(this);
-  getFolder();
-  
-  //Define Buttons
-  buttonProgressData = 	new Button(0,				height-100,		0,			100,		"",			0,			0,-1); 						//move progress
-  buttonProgressFrame = new Button(0,				height-100,		width,		100, 		"",			0,			0,	1); //frame Click to set play position
-  
-  buttonPrevious = 		new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-85,2);//Previous song
-  buttonPause = 		new Button(width/3,			height/2-200,	width/3,	height/2,	"play.png",	width/2-50,	height/2-85,0); //Pause/Play
-  buttonNext = 			new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-210,	height/2-85,3);//Next song
+  	size(displayWidth, displayHeight, P3D);
+    	if (frame != null) 
+    	{
+    		frame.setResizable(false);
+  		}
+	noCursor();
+	minim = new Minim(this);
+	getFolder();
+	  
+	//Define Buttons
+	buttonProgressData = new Button(0,				75,		0,			100,		"",			0,			0,-1); 						//move progress
+	buttonProgressFrame = new Button(0,				75,		width,		100, 		"",			0,			0,	1); //frame Click to set play position
+	  
+	buttonPrevious = 	new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-85,2);//Previous song
+	buttonPause = 		new Button(width/3,			height/2-200,	width/3,	height/2,	"play.png",	width/2-50,	height/2-85,0); //Pause/Play
+	buttonNext = 		new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-210,	height/2-85,3);//Next song
 
-  getCurrentSong();
+	getCurrentSong();
+
+	leap = new LeapMotionP5(this);
+	leap.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
+	leap.enableGesture(Gesture.Type.TYPE_SWIPE);
+}
+
+public void screenTapGestureRecognized(ScreenTapGesture gesture) 
+{
+  if (gesture.state() == State.STATE_STOP) 
+  {
+  	if(timePassed>10)
+  	{
+  		println("CLICK: ");
+  		mousePressed();
+    	timePassed = 0;
+  	}
+    
+  }
+}
+
+public void swipeGestureRecognized(SwipeGesture gesture) 
+{
+  	if (gesture.state() == State.STATE_STOP) 
+  	{
+    	if(gesture.direction().get(0)>0)
+    	{
+			if(timePassed>10)
+  			{
+  				prev = true;
+	    		command(buttonPrevious.commandNumber);
+	    		timePassed = 0;
+	    		println("SWIPE PREV");
+    		}
+    	}
+    	else 
+		{
+  			if(timePassed>10)
+  			{
+  				next = true;
+  				command(buttonNext.commandNumber);	
+    			timePassed = 0;
+    			println("SWIPE NEXT");
+  			}
+  		} 
+  	}
 }
  
 public void draw()
@@ -154,66 +217,65 @@ public void draw()
   
     if (showMp3Image) {
     if (mp3Image!=null) {
-      image(mp3Image, width-mp3Image.width, 0);
+      image(mp3Image, width-mp3Image.width, height-mp3Image.height);
     }
   }
   
   checkMouseOver();
-
+  LeapDraw();
+  timePassed++;
   visual1.display();
+
 }
+
+public void LeapDraw()
+  {
+      noFill();
+      stroke(255);
+
+      if(leap.getFingerList().size()==1)
+      {
+        Finger f = leap.getFingerList().get(0);
+          
+        PVector position = leap.getTip(f);
+        x = (int)position.x;
+        y = (int)position.y;
+      }
+    
+    mouseX = x;
+    mouseY = y;
+    ellipse(x, y, 10, 10);
+  }
 
 public void mousePressed()
 {
   //Welke button?
   if(buttonPause.over())
   {
+  	pausee = true;
     command(buttonPause.commandNumber);
-  }else if(buttonProgressFrame.over())
+    println("PAUSED: ");
+  }
+  else if(buttonProgressFrame.over())
   {
     command(buttonProgressFrame.commandNumber);
-  }else if(buttonNext.over())
+    println("PROGRESSED: ");
+  }
+  else if(buttonNext.over())
   {
+  	next = true;
      command(buttonNext.commandNumber);
-  }else if(buttonPrevious.over())
+     println("NEXTED: ");
+  }
+  else if(buttonPrevious.over())
   {
+  	prev = true;
     command(buttonPrevious.commandNumber);
+    println("PREVIOUSED: ");
   }
   
   else{
     println("not found");
-  }
-}
-
-public void keyPressed()
-{
-  switch(key)
-  {
-    case ' ':
-    command(buttonPause.commandNumber);
-    break;
-    
-    case 'n':
-    command(buttonNext.commandNumber);
-    break;
-    
-    case 'p':
-    command(buttonPrevious.commandNumber);
-    break;
-    
-    case 'i':
-    // show image from MP3 when available
-    tryToShowCoverImage();
-    showMp3Image=true;
-    break;
-    
-    case 'I':
-    showMp3Image=false;
-    break;  
-    
-    
-    default:
-    break;
   }
 }
 
@@ -233,31 +295,6 @@ public void checkMouseOver()
     }else if(buttonPrevious.over())
     {
       buttonPrevious.showMouseOver();
-    }
-    else if(mouseX>width-mp3Image.width && mouseY<mp3Image.height)
-    {
-    	rectMode(CORNER);
-	    int ys = 50; //start pos
-	    int yi = 16; //y line diff.
-	    
-	    int y = ys;
-	    fill(255);
-	    if(!(meta==null))
-	    {
-	    	textTab("Length: \t" + strFromMillis(meta.length()), 35, y+=yi);
-		    textTab("Title: \t" + meta.title(), 35, y+=yi);
-		    textTab("Author: \t" + meta.author(), 35, y+=yi);
-		    textTab("Album: \t" + meta.album(), 35, y+=yi);
-		    textTab("Date: \t" + meta.date(), 35, y+=yi);
-		    textTab("Genre:\t" + meta.genre(), 35, y+=yi);
-		    textTab("Copyright:  \t" + meta.copyright(), 35, y+=yi);
-		    textTab("Disc: \t" + meta.disc(), 35, y+=yi);
-		    textTab("Composer: \t" + meta.composer(), 35, y+=yi);
-		    textTab("Orchestra: \t" + meta.orchestra(), 35, y+=yi);
-		    textTab("Publisher: \t" + meta.publisher(), 35, y+=yi);
-		    textTab("Encoded: \t" + meta.encoded(), 35, y+=yi);
-		    textTab("Comment: \t" + meta.comment(), 35, y+=yi);
-	  	}
     }
     /*else
     {
@@ -299,7 +336,7 @@ public void showOtherScreenElements()
 	    if(!song.isPlaying())
 	    {
 	      fill(255);
-	      text("pause",width/2-17,54);
+	      text("Gepauzeerd",width/2-17,54);
 	    }
 	}
 	catch(Exception e)
@@ -320,40 +357,57 @@ public void command(int commandNumber)
   switch(commandNumber)
   {
     case 0:
-    if(song.isPlaying())
+    if(pausee == true)
     {
-      song.pause();
-      paused = true;
+    	if(song.isPlaying())
+	    {
+	      song.pause();
+	      paused = true;
+	    }
+	    else
+	    {
+	      song.play();
+	      paused=false;
+	    }
+	    pausee = false;
     }
-    else
-    {
-      song.play();
-      paused=false;
-    }
+    
     break;
     
     case 1:
-     int newSongPosition = PApplet.parseInt(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
-     song.cue(newSongPosition);
-    break;
+
+     	int newSongPosition = PApplet.parseInt(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
+     	song.cue(newSongPosition);
+    	break;
     
     case 2:
-     indexFile--;
-    if(indexFile<0)
-    {
-      indexFile=0;
-      getCurrentSong();
-      break;
-    }
-    
+    	if(prev == true)
+    	{
+    		indexFile--;
+
+	    	if(indexFile<0)
+	    	{
+	     		indexFile=namesFiles.length-1;
+	  		}
+	      	getCurrentSong();
+	      	prev = false;
+    	}
+     	
+      	break;
+
     case 3:
-    indexFile++;
-    //Last song?
-    if(indexFile>=namesFiles.length)
-    //indexFile=namesFiles.length-1; //last song again and again
-    indexFile=0;//1st song in folder
-    getCurrentSong();
-    break;
+	    if(next == true)
+	    {
+	    	indexFile++;
+		    //Last song?
+		    if(indexFile>=namesFiles.length)
+		    	indexFile=0;//1st song in folder
+		    getCurrentSong();
+		    next = false;
+	    
+    	}
+    	break;
+    
     
     case 4:
     chooseFolder();
@@ -402,7 +456,7 @@ public void getCurrentSong()
       println("not ok" + namesFiles[indexFile]);
     }
     }else{
-    println("No song found at all - not ok");
+    println("Geen nummers gevonden - not ok");
     noSongFound = true;
     }
   }
@@ -515,7 +569,8 @@ public void getCurrentSong()
       return "?";
     } else
     {
-      return meta.fileName().substring(pathGlobal.length() + 1);  
+      //return meta.fileName().substring(pathGlobal.length() + 1); 
+      return meta.author() + " - " + meta.title();
     }
   }
   
@@ -974,6 +1029,7 @@ public int read24bit(byte[] data)
     (data[3] & 0xFF);
 }
 // 
+
 
 
 
