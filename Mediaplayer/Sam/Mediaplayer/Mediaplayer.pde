@@ -26,6 +26,7 @@ import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.ScreenTapGesture;
 import com.onformative.leap.*;
 import com.leapmotion.leap.*;
+import fullscreen.*;
  
  //Songs
 Minim minim;
@@ -62,6 +63,8 @@ int timePassed;
 boolean next = false;
 boolean prev = false;
 boolean pausee = false;
+
+Frame fullScreenFrame;
 
  
 void setup()
@@ -104,6 +107,10 @@ public void screenTapGestureRecognized(ScreenTapGesture gesture)
   }
 }
 
+boolean sketchFullScreen() {
+  return true;
+}
+
 public void swipeGestureRecognized(SwipeGesture gesture) 
 {
   	if (gesture.state() == State.STATE_STOP) 
@@ -112,7 +119,7 @@ public void swipeGestureRecognized(SwipeGesture gesture)
     	{
 			if(timePassed>10)
   			{
-  				prev = true;
+  	                prev = true;
 	    		command(buttonPrevious.commandNumber);
 	    		timePassed = 0;
 	    		println("SWIPE PREV");
@@ -286,7 +293,7 @@ void showOtherScreenElements()
     try
     {
     	textSize(26);
-      	text(strFromMillis(song.position()),map(song.position(),0,meta.length(),0,width)-20, height-115);
+      	text(strFromMillis(song.position()),map(song.position(),0,meta.length(),0,width)-20, 205);
       	text(strFromMillis(songLength), width-75, height-55);
       	textSize(14);
 
@@ -407,6 +414,7 @@ void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
+      song.setGain(-80);
       visual1 = new Visual1(song);
     }else
     {
