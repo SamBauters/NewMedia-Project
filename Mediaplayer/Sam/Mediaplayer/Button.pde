@@ -34,9 +34,10 @@ class Button
     noStroke();
     if(img!=null)
     {
-      tint(255, 63);  // Apply transparency without changing color
+      tint(36,92,115);  // Apply transparency without changing color
       image(img, imgX, imgY);
-      tint(255, 255);
+      //tint(255, 255);
+      tint(86, 135,140);
     }
     else 
     {

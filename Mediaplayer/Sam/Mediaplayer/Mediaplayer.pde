@@ -7,7 +7,6 @@ import ddf.minim.effects.*;
 
 import java.awt.image.BufferedImage;
 import java.awt.BorderLayout;
-import java.awt.image.BufferedImage;
 
 import java.io.*;
 import java.io.ByteArrayInputStream;
@@ -21,7 +20,6 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
  
-import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.ScreenTapGesture;
 import com.onformative.leap.*;
@@ -140,12 +138,12 @@ public void swipeGestureRecognized(SwipeGesture gesture)
  
 void draw()
 {
-  background(0);
+  background(#021D40);
   
   if(noSongFound)
   {
     fill(255);
-    textTab("No song found in \n" + pathGlobal,20,20);
+    textTab("Geen songs gevonden in \n" + pathGlobal,20,20);
   }
   
   if(!noSongFound)
@@ -229,6 +227,7 @@ void mousePressed()
   {
   	next = true;
      command(buttonNext.commandNumber);
+     tryToShowCoverImage();
      println("NEXTED: ");
   }
   else if(buttonPrevious.over())
@@ -372,11 +371,6 @@ void command(int commandNumber)
     	}
     	break;
     
-    
-    case 4:
-    chooseFolder();
-    break;
-    
     case -1:
     //undefined
     break;
@@ -414,7 +408,8 @@ void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
-      song.setGain(-80);
+      
+      //song.setGain(-80);
       visual1 = new Visual1(song);
     }else
     {
@@ -423,26 +418,6 @@ void getCurrentSong()
     }else{
     println("Geen nummers gevonden - not ok");
     noSongFound = true;
-    }
-  }
-  
-  void chooseFolder()
-  {
-    selectFolder("Select a music folder to play","folderSelected");
-  }
-  
-  void folderSelected(File selection)
-  {
-    if(selection == null)
-    {
-      println("Window was closed or the user hit cancel.");
-    } else{
-      println("User selected " + selection.getAbsolutePath());
-      noSongFound = false;
-      indexFile = 0;
-      pathGlobal=selection.getAbsolutePath();
-      getFolder();
-      getCurrentSong();
     }
   }
   
