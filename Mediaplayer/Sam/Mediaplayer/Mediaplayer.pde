@@ -71,7 +71,7 @@ void setup()
     	if (frame != null) 
     	{
     		frame.setResizable(false);
-  		}
+        }
 	noCursor();
 	minim = new Minim(this);
 	getFolder();
@@ -89,6 +89,7 @@ void setup()
 	leap = new LeapMotionP5(this);
 	leap.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
 	leap.enableGesture(Gesture.Type.TYPE_SWIPE);
+        leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
 }
 
 public void screenTapGestureRecognized(ScreenTapGesture gesture) 
@@ -97,16 +98,27 @@ public void screenTapGestureRecognized(ScreenTapGesture gesture)
   {
   	if(timePassed>10)
   	{
-  		println("CLICK: ");
-  		mousePressed();
-    	timePassed = 0;
+          println("CLICK: ");
+          mousePressed();
+    	  timePassed = 0;
   	}
-    
-  }
+   }
 }
 
 boolean sketchFullScreen() {
   return true;
+}
+
+public void circleGestureRecognized(CircleGesture gesture, String clockwiseness) {
+  if (gesture.state() == State.STATE_STOP) {    
+    if(clockwiseness == "clockwise")
+    {
+      song.shiftGain(10.0, 0.0, 10000);
+    } else
+    {
+      song.shiftGain(-10.0, 0.0, 10000);
+    }
+  }s
 }
 
 public void swipeGestureRecognized(SwipeGesture gesture) 
@@ -121,16 +133,18 @@ public void swipeGestureRecognized(SwipeGesture gesture)
 	    		command(buttonPrevious.commandNumber);
 	    		timePassed = 0;
 	    		println("SWIPE PREV");
+                        tryToShowCoverImage();
     		}
     	}
     	else 
 		{
   			if(timePassed>10)
   			{
-  				next = true;
-  				command(buttonNext.commandNumber);	
+  			next = true;
+  			command(buttonNext.commandNumber);	
     			timePassed = 0;
     			println("SWIPE NEXT");
+                        tryToShowCoverImage();
   			}
   		} 
   	}
@@ -234,6 +248,7 @@ void mousePressed()
   {
   	prev = true;
     command(buttonPrevious.commandNumber);
+    tryToShowCoverImage();
     println("PREVIOUSED: ");
   }
   
