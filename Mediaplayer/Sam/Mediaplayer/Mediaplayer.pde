@@ -111,14 +111,15 @@ boolean sketchFullScreen() {
 
 public void circleGestureRecognized(CircleGesture gesture, String clockwiseness) {
   if (gesture.state() == State.STATE_STOP) {    
+    //System.out.println("Duration: " + gesture.durationSeconds() + "s");
     if(clockwiseness == "clockwise")
     {
-      song.shiftGain(10.0, 0.0, 10000);
+      song.shiftGain(gesture.durationSeconds()*15, 0.0, 20000);
     } else
     {
-      song.shiftGain(-10.0, 0.0, 10000);
+      song.shiftGain(-(gesture.durationSeconds()*15), 0.0, 20000);
     }
-  }s
+  }
 }
 
 public void swipeGestureRecognized(SwipeGesture gesture) 
