@@ -24,7 +24,6 @@ import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.ScreenTapGesture;
 import com.onformative.leap.*;
 import com.leapmotion.leap.*;
-import fullscreen.*;
  
  //Songs
 Minim minim;
@@ -44,7 +43,7 @@ Button buttonPrevious;
 Button buttonNext;
 
 //Visuals
-Visual visual;
+Visual1 visual1;
 
 //Files
 String pathGlobal="";
@@ -62,6 +61,8 @@ boolean next = false;
 boolean prev = false;
 boolean pausee = false;
 
+Frame fullScreenFrame;
+
  
 void setup()
 {
@@ -78,18 +79,16 @@ void setup()
 	buttonProgressData = new Button(0,				75,		0,			100,		"",			0,			0,-1); 						//move progress
 	buttonProgressFrame = new Button(0,				75,		width,		100, 		"",			0,			0,	1); //frame Click to set play position
 	  
-	buttonPrevious = 	new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-85,2);//Previous song
-	buttonPause = 		new Button(width/3,			height/2-200,	width/3,	height/2,	"play.png",	width/2-50,	height/2-85,0); //Pause/Play
-	buttonNext = 		new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-210,	height/2-85,3);//Next song
+	buttonPrevious = 	new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-175,2);//Previous song
+	buttonPause = 		new Button(width/3,			height/2-200,	width/2,	height/2,	"play.png",	width/2-185,	height/2-175,0); //Pause/Play
+	buttonNext = 		new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-360,	height/2-175,3);//Next song
 
 	getCurrentSong();
 
 	leap = new LeapMotionP5(this);
 	leap.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
 	leap.enableGesture(Gesture.Type.TYPE_SWIPE);
-    leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
-
-    visual = new Visual(song);
+        leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
 }
 
 public void screenTapGestureRecognized(ScreenTapGesture gesture) 
@@ -104,7 +103,6 @@ public void screenTapGestureRecognized(ScreenTapGesture gesture)
   	}
    }
 }
-
 
 boolean sketchFullScreen() {
   return true;
@@ -154,11 +152,11 @@ public void swipeGestureRecognized(SwipeGesture gesture)
  
 void draw()
 {
-  background(#021D40);
+  background(217,228,233);
   
   if(noSongFound)
   {
-    fill(255);
+    fill(#000000);
     textTab("Geen songs gevonden in \n" + pathGlobal,20,20);
   }
   
@@ -185,7 +183,6 @@ void draw()
       if(!song.isPlaying()&&!paused)
       {
         //Next Song
-        next = true;
         command(buttonNext.commandNumber);
       }
     }catch(Exception e)
@@ -203,14 +200,14 @@ void draw()
   checkMouseOver();
   LeapDraw();
   timePassed++;
-  
-  visual.display();
+  visual1.display();
+
 }
 
 void LeapDraw()
   {
       noFill();
-      stroke(255);
+      stroke(#000000);
 
       if(leap.getFingerList().size()==1)
       {
@@ -305,7 +302,7 @@ void showOtherScreenElements()
     }
     */
     
-    fill(255);
+    fill(#000000);
     
     try
     {
@@ -316,7 +313,7 @@ void showOtherScreenElements()
 
 	    if(!song.isPlaying())
 	    {
-	      fill(255);
+	      fill(#000000);
 	      text("Gepauzeerd",width/2-17,54);
 	    }
 	}
@@ -357,7 +354,7 @@ void command(int commandNumber)
     
     case 1:
 
-     	int newSongPosition = int(map(mouseX,0,buttonProgressFrame.w,0, songLength));
+     	int newSongPosition = int(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
      	song.cue(newSongPosition);
     	break;
     
@@ -426,6 +423,9 @@ void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
+      
+      //song.setGain(-80);
+      visual1 = new Visual1(song);
     }else
     {
       println("not ok" + namesFiles[indexFile]);
@@ -474,7 +474,7 @@ void getCurrentSong()
     
     if(namesFiles.length==0)
     {
-      println("no song ################");
+      println("Geen nummer ################");
       noSongFound = true;
     }
     else
@@ -505,12 +505,11 @@ void getCurrentSong()
   
   void showMeta()
   {
-    //fill(255);
+    fill(#000000);
     if(!(meta==null))
     {
-    	textSize(26);
+    	    textSize(26);
 	    textTab(showSongWithoutFolder(), 10, 35);
-	    textSize(12);
   	}
   }
   

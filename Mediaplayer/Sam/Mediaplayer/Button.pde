@@ -41,7 +41,7 @@ class Button
     }
     else 
     {
-      fill(255,63);
+      fill(127,63);
       rect(x,y,w,h);
       fill(255);
     }
