@@ -2,8 +2,6 @@ Design
 Shuffle, Gain, Repeat buttons
 Visuals
 Bugfixes
-	- Niet verspringen naar volgend liedje. (bij het einde)
 	- Random bug -nullrefexception
-	- Library not found?
 Eigen gesture
 Play & Pause button

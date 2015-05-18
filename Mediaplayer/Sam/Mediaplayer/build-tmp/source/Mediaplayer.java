@@ -11,7 +11,6 @@ import ddf.minim.ugens.*;
 import ddf.minim.effects.*; 
 import java.awt.image.BufferedImage; 
 import java.awt.BorderLayout; 
-import java.awt.image.BufferedImage; 
 import java.io.*; 
 import java.io.ByteArrayInputStream; 
 import java.io.FileInputStream; 
@@ -23,11 +22,11 @@ import javax.swing.ImageIcon;
 import javax.swing.JFrame; 
 import javax.swing.JLabel; 
 import com.leapmotion.leap.Gesture.State; 
-import com.leapmotion.leap.Gesture.State; 
 import com.leapmotion.leap.ScreenTapGesture; 
 import com.onformative.leap.*; 
 import com.leapmotion.leap.*; 
 import ddf.minim.*; 
+import ddf.minim.analysis.*; 
 import ddf.minim.analysis.*; 
 
 import java.util.HashMap; 
@@ -62,9 +61,7 @@ public class Mediaplayer extends PApplet {
 
 
 
-
  
-
 
 
 
@@ -88,7 +85,7 @@ Button buttonPrevious;
 Button buttonNext;
 
 //Visuals
-Visual1 visual1;
+Visual visual;
 
 //Files
 String pathGlobal="";
@@ -113,7 +110,7 @@ public void setup()
     	if (frame != null) 
     	{
     		frame.setResizable(false);
-  		}
+        }
 	noCursor();
 	minim = new Minim(this);
 	getFolder();
@@ -131,6 +128,9 @@ public void setup()
 	leap = new LeapMotionP5(this);
 	leap.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
 	leap.enableGesture(Gesture.Type.TYPE_SWIPE);
+    leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
+
+    visual = new Visual(song);
 }
 
 public void screenTapGestureRecognized(ScreenTapGesture gesture) 
@@ -139,11 +139,28 @@ public void screenTapGestureRecognized(ScreenTapGesture gesture)
   {
   	if(timePassed>10)
   	{
-  		println("CLICK: ");
-  		mousePressed();
-    	timePassed = 0;
+          println("CLICK: ");
+          mousePressed();
+    	  timePassed = 0;
   	}
-    
+   }
+}
+
+
+public boolean sketchFullScreen() {
+  return true;
+}
+
+public void circleGestureRecognized(CircleGesture gesture, String clockwiseness) {
+  if (gesture.state() == State.STATE_STOP) {    
+    //System.out.println("Duration: " + gesture.durationSeconds() + "s");
+    if(clockwiseness == "clockwise")
+    {
+      song.shiftGain(gesture.durationSeconds()*15, 0.0f, 20000);
+    } else
+    {
+      song.shiftGain(-(gesture.durationSeconds()*15), 0.0f, 20000);
+    }
   }
 }
 
@@ -155,20 +172,22 @@ public void swipeGestureRecognized(SwipeGesture gesture)
     	{
 			if(timePassed>10)
   			{
-  				prev = true;
+  	                prev = true;
 	    		command(buttonPrevious.commandNumber);
 	    		timePassed = 0;
 	    		println("SWIPE PREV");
+                        tryToShowCoverImage();
     		}
     	}
     	else 
 		{
   			if(timePassed>10)
   			{
-  				next = true;
-  				command(buttonNext.commandNumber);	
+  			next = true;
+  			command(buttonNext.commandNumber);	
     			timePassed = 0;
     			println("SWIPE NEXT");
+                        tryToShowCoverImage();
   			}
   		} 
   	}
@@ -176,12 +195,12 @@ public void swipeGestureRecognized(SwipeGesture gesture)
  
 public void draw()
 {
-  background(0);
+  background(0xff021D40);
   
   if(noSongFound)
   {
     fill(255);
-    textTab("No song found in \n" + pathGlobal,20,20);
+    textTab("Geen songs gevonden in \n" + pathGlobal,20,20);
   }
   
   if(!noSongFound)
@@ -207,6 +226,7 @@ public void draw()
       if(!song.isPlaying()&&!paused)
       {
         //Next Song
+        next = true;
         command(buttonNext.commandNumber);
       }
     }catch(Exception e)
@@ -224,8 +244,8 @@ public void draw()
   checkMouseOver();
   LeapDraw();
   timePassed++;
-  visual1.display();
-
+  
+  visual.display();
 }
 
 public void LeapDraw()
@@ -265,12 +285,14 @@ public void mousePressed()
   {
   	next = true;
      command(buttonNext.commandNumber);
+     tryToShowCoverImage();
      println("NEXTED: ");
   }
   else if(buttonPrevious.over())
   {
   	prev = true;
     command(buttonPrevious.commandNumber);
+    tryToShowCoverImage();
     println("PREVIOUSED: ");
   }
   
@@ -329,7 +351,7 @@ public void showOtherScreenElements()
     try
     {
     	textSize(26);
-      	text(strFromMillis(song.position()),map(song.position(),0,meta.length(),0,width)-20, height-115);
+      	text(strFromMillis(song.position()),map(song.position(),0,meta.length(),0,width)-20, 205);
       	text(strFromMillis(songLength), width-75, height-55);
       	textSize(14);
 
@@ -376,7 +398,7 @@ public void command(int commandNumber)
     
     case 1:
 
-     	int newSongPosition = PApplet.parseInt(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
+     	int newSongPosition = PApplet.parseInt(map(mouseX,0,buttonProgressFrame.w,0, songLength));
      	song.cue(newSongPosition);
     	break;
     
@@ -407,11 +429,6 @@ public void command(int commandNumber)
 	    
     	}
     	break;
-    
-    
-    case 4:
-    chooseFolder();
-    break;
     
     case -1:
     //undefined
@@ -450,7 +467,6 @@ public void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
-      visual1 = new Visual1(song);
     }else
     {
       println("not ok" + namesFiles[indexFile]);
@@ -458,26 +474,6 @@ public void getCurrentSong()
     }else{
     println("Geen nummers gevonden - not ok");
     noSongFound = true;
-    }
-  }
-  
-  public void chooseFolder()
-  {
-    selectFolder("Select a music folder to play","folderSelected");
-  }
-  
-  public void folderSelected(File selection)
-  {
-    if(selection == null)
-    {
-      println("Window was closed or the user hit cancel.");
-    } else{
-      println("User selected " + selection.getAbsolutePath());
-      noSongFound = false;
-      indexFile = 0;
-      pathGlobal=selection.getAbsolutePath();
-      getFolder();
-      getCurrentSong();
     }
   }
   
@@ -666,9 +662,10 @@ class Button
     noStroke();
     if(img!=null)
     {
-      tint(255, 63);  // Apply transparency without changing color
+      tint(36,92,115);  // Apply transparency without changing color
       image(img, imgX, imgY);
-      tint(255, 255);
+      //tint(255, 255);
+      tint(86, 135,140);
     }
     else 
     {
@@ -711,6 +708,157 @@ class Button
 
   }
 }
+
+
+
+class Visual
+{
+
+BeatDetect beat;
+AudioPlayer player;
+int  r = 200;
+float rad = 70;
+
+Visual(AudioPlayer oPlayer)
+{
+    player = oPlayer;
+    beat = new BeatDetect();
+}
+
+public void display()
+{ 
+
+  float t = map(mouseX, 0, width, 0, 1);
+  beat.detect(player.mix);
+  fill(0xff1A1F18, 20);
+  noStroke();
+  rect(0, 0, width, height);
+  translate(width/2, height/2);
+  noFill();
+  fill(-1, 10);
+  if (beat.isOnset()) rad = rad*0.9f;
+  else rad = 70;
+  //ellipse(0, 0, 2*rad, 2*rad);
+  stroke(-1, 50);
+  int bsize = player.bufferSize();
+  for (int i = 0; i < bsize - 1; i+=5)
+  {
+    float x = (r)*cos(i*2*PI/bsize);
+    float y = (r)*sin(i*2*PI/bsize);
+    float x2 = (r + player.left.get(i)*100)*cos(i*2*PI/bsize);
+    float y2 = (r + player.left.get(i)*100)*sin(i*2*PI/bsize);
+    line(x, y, x2, y2);
+  }
+  beginShape();
+  noFill();
+  stroke(-1, 50);
+  for (int i = 0; i < bsize; i+=30)
+  {
+    float x2 = (r + player.left.get(i)*100)*cos(i*2*PI/bsize);
+    float y2 = (r + player.left.get(i)*100)*sin(i*2*PI/bsize);
+    vertex(x2, y2);
+    pushStyle();
+    stroke(-1);
+    strokeWeight(2);
+    point(x2, y2);
+    popStyle();
+  }
+  endShape();
+  return;
+}
+}
+
+/// abstract class for audio visualization
+
+abstract class AudioRenderer implements AudioListener {
+  float[] left;
+  float[] right;
+  public synchronized void samples(float[] samp) { left = samp; }
+  public synchronized void samples(float[] sampL, float[] sampR) { left = sampL; right = sampR; }
+  public abstract void setup();
+  public abstract void draw(); 
+}
+
+
+// abstract class for FFT visualization
+
+
+
+abstract class FourierRenderer extends AudioRenderer {
+  FFT fft; 
+  float maxFFT;
+  float[] leftFFT;
+  float[] rightFFT;
+  FourierRenderer(AudioSource source) {
+    float gain = .125f;
+    fft = new FFT(source.bufferSize(), source.sampleRate());
+    maxFFT =  source.sampleRate() / source.bufferSize() * gain;
+    fft.window(FFT.HAMMING);
+  }
+  
+  public void calc(int bands) {
+    if(left != null) {
+      leftFFT = new float[bands];
+      fft.linAverages(bands);
+      fft.forward(left);
+      for(int i = 0; i < bands; i++) leftFFT[i] = fft.getAvg(i);   
+    }
+  }
+}
+
+
+
+class RadarRenderer extends AudioRenderer {
+  
+  float aura = .25f;
+  float orbit = .25f;
+  int delay = 2;
+  
+  int rotations;
+
+  RadarRenderer(AudioSource source) {
+    rotations =  (int) source.sampleRate() / source.bufferSize();
+  }
+  
+  public void setup() {
+    colorMode(RGB, TWO_PI * rotations, 1, 1);
+    //background(0);
+  }
+  
+  public synchronized void draw()
+  {
+    if(left != null) {
+   
+      float t = map(millis(),0, delay * 1000, 0, PI);   
+      int n = left.length;
+      
+      // center 
+      float w = width/2 + cos(t) * width * orbit;
+      float h = height/2 + sin(t) * height * orbit; 
+      
+      // size of the aura
+      float w2 = width * aura, h2 = height * aura;
+      
+      // smoke effect
+      if(frameCount % delay == 0 ) image(get(),-1.5f,-1.5f, width + 3, height + 3); 
+      
+      // draw polar curve 
+      float r1=0, a1=0, x1=0, y1=0, r2=0, a2=0, x2=0, y2=0; 
+      for(int i=0; i <= n; i++)
+      {
+        r1 = r2; a1 = a2; x1 = x2; y1 = y2;
+        r2 = left[i % n] ;
+        a2 = map(i,0, n, 0, TWO_PI * rotations);
+        x2 = w + cos(a2) * r2 * w2;
+        y2 = h + sin(a2) * r2 * h2;
+        stroke(a1, 1, 1, 30);
+        // strokeWeight(dist(x1,y1,x2,y2) / 4);
+        if(i>0) line(x1, y1, x2, y2);
+      }
+    }
+  }
+}
+
 
 
 // show cover image from MP3 
@@ -1031,64 +1179,61 @@ public int read24bit(byte[] data)
 // 
 
 
+class VortexRenderer extends FourierRenderer {
 
+  int n = 48;
+  float squeeze = .5f;
 
-class Visual1
-{
+  float val[];
 
-BeatDetect beat;
-AudioPlayer player;
-int  r = 200;
-float rad = 70;
-
-Visual1(AudioPlayer oPlayer)
-{
-    player = oPlayer;
-    beat = new BeatDetect();
-}
-
-public void display()
-{ 
-
-  float t = map(mouseX, 0, width, 0, 1);
-  beat.detect(player.mix);
-  fill(0xff1A1F18, 20);
-  noStroke();
-  rect(0, 0, width, height);
-  translate(width/2, height/2);
-  noFill();
-  fill(-1, 10);
-  if (beat.isOnset()) rad = rad*0.9f;
-  else rad = 70;
-  //ellipse(0, 0, 2*rad, 2*rad);
-  stroke(-1, 50);
-  int bsize = player.bufferSize();
-  for (int i = 0; i < bsize - 1; i+=5)
-  {
-    float x = (r)*cos(i*2*PI/bsize);
-    float y = (r)*sin(i*2*PI/bsize);
-    float x2 = (r + player.left.get(i)*100)*cos(i*2*PI/bsize);
-    float y2 = (r + player.left.get(i)*100)*sin(i*2*PI/bsize);
-    line(x, y, x2, y2);
+  VortexRenderer(AudioSource source) {
+    super(source); 
+    val = new float[n];
   }
-  beginShape();
-  noFill();
-  stroke(-1, 50);
-  for (int i = 0; i < bsize; i+=30)
-  {
-    float x2 = (r + player.left.get(i)*100)*cos(i*2*PI/bsize);
-    float y2 = (r + player.left.get(i)*100)*sin(i*2*PI/bsize);
-    vertex(x2, y2);
-    pushStyle();
-    stroke(-1);
-    strokeWeight(2);
-    point(x2, y2);
-    popStyle();
+
+  public void setup() {
+    colorMode(HSB, n, n, n);
+    rectMode(CORNERS);
+    noStroke();
+    noSmooth();    
   }
-  endShape();
-  return;
+
+  public synchronized void draw() {
+
+    if(left != null) {  
+      
+      float t = map(millis(),0, 3000, 0, TWO_PI);
+      float dx = width / n;
+      float dy = height / n * .5f;
+      super.calc(n);
+
+      // rotate slowly
+      //background(0); lights();
+      translate(width/2, height, -width/2);
+      rotateZ(HALF_PI); 
+      rotateY(-2.2f - HALF_PI + PApplet.parseFloat(mouseY)/height * HALF_PI);
+      rotateX(t);
+      translate(0,width/4,0);
+      rotateX(t);
+
+      // draw coloured slices
+      for(int i=0; i < n; i++)
+      {
+        val[i] = lerp(val[i], pow(leftFFT[i] * (i+1), squeeze), .1f);
+        float x = map(i, 0, n, height, 0);
+        float y = map(val[i], 0, maxFFT, 0, width/2);
+        pushMatrix();
+          translate(x, 0, 0);
+          rotateX(PI/16 * i);
+          fill(i, n * .7f + i * .3f, n-i);
+          box(dy, dx + y, dx + y);
+        popMatrix();
+      }
+    }
+  }
 }
-}
+
+
   static public void main(String[] passedArgs) {
     String[] appletArgs = new String[] { "Mediaplayer" };
     if (passedArgs != null) {

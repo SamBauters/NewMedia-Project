@@ -1,7 +1,7 @@
 import ddf.minim.*;
 import ddf.minim.analysis.*;
 
-class Visual1
+class Visual
 {
 
 BeatDetect beat;
@@ -9,7 +9,7 @@ AudioPlayer player;
 int  r = 200;
 float rad = 70;
 
-Visual1(AudioPlayer oPlayer)
+Visual(AudioPlayer oPlayer)
 {
     player = oPlayer;
     beat = new BeatDetect();

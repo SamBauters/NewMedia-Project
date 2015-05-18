@@ -43,7 +43,7 @@ Button buttonPrevious;
 Button buttonNext;
 
 //Visuals
-Visual1 visual1;
+Visual visual;
 
 //Files
 String pathGlobal="";
@@ -60,8 +60,6 @@ int timePassed;
 boolean next = false;
 boolean prev = false;
 boolean pausee = false;
-
-Frame fullScreenFrame;
 
  
 void setup()
@@ -88,7 +86,9 @@ void setup()
 	leap = new LeapMotionP5(this);
 	leap.enableGesture(Gesture.Type.TYPE_SCREEN_TAP);
 	leap.enableGesture(Gesture.Type.TYPE_SWIPE);
-        leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
+    leap.enableGesture(Gesture.Type.TYPE_CIRCLE);
+
+    visual = new Visual(song);
 }
 
 public void screenTapGestureRecognized(ScreenTapGesture gesture) 
@@ -103,6 +103,7 @@ public void screenTapGestureRecognized(ScreenTapGesture gesture)
   	}
    }
 }
+
 
 boolean sketchFullScreen() {
   return true;
@@ -183,6 +184,7 @@ void draw()
       if(!song.isPlaying()&&!paused)
       {
         //Next Song
+        next = true;
         command(buttonNext.commandNumber);
       }
     }catch(Exception e)
@@ -200,8 +202,8 @@ void draw()
   checkMouseOver();
   LeapDraw();
   timePassed++;
-  visual1.display();
-
+  
+  visual.display();
 }
 
 void LeapDraw()
@@ -354,7 +356,7 @@ void command(int commandNumber)
     
     case 1:
 
-     	int newSongPosition = int(map(mouseX,buttonProgressFrame.x, buttonProgressFrame.x+buttonProgressFrame.w,0, songLength));
+     	int newSongPosition = int(map(mouseX,0,buttonProgressFrame.w,0, songLength));
      	song.cue(newSongPosition);
     	break;
     
@@ -423,9 +425,6 @@ void getCurrentSong()
       //and also needs to know the sample rate of the audio it is analyzing
        fft = new FFT(song.bufferSize(), song.sampleRate());
       song.play();
-      
-      //song.setGain(-80);
-      visual1 = new Visual1(song);
     }else
     {
       println("not ok" + namesFiles[indexFile]);
