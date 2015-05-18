@@ -24,6 +24,7 @@ import com.leapmotion.leap.Gesture.State;
 import com.leapmotion.leap.ScreenTapGesture;
 import com.onformative.leap.*;
 import com.leapmotion.leap.*;
+import fullscreen.*;
  
  //Songs
 Minim minim;
@@ -77,9 +78,9 @@ void setup()
 	buttonProgressData = new Button(0,				75,		0,			100,		"",			0,			0,-1); 						//move progress
 	buttonProgressFrame = new Button(0,				75,		width,		100, 		"",			0,			0,	1); //frame Click to set play position
 	  
-	buttonPrevious = 	new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-175,2);//Previous song
-	buttonPause = 		new Button(width/3,			height/2-200,	width/2,	height/2,	"play.png",	width/2-185,	height/2-175,0); //Pause/Play
-	buttonNext = 		new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-360,	height/2-175,3);//Next song
+	buttonPrevious = 	new Button(0, 				height/2-200,	width/5,	height/2,	"prev.png",	10,			height/2-85,2);//Previous song
+	buttonPause = 		new Button(width/3,			height/2-200,	width/3,	height/2,	"play.png",	width/2-50,	height/2-85,0); //Pause/Play
+	buttonNext = 		new Button(width-width/5,	height/2-200,	width/5,	height/2,	"next.png",	width-210,	height/2-85,3);//Next song
 
 	getCurrentSong();
 
@@ -153,11 +154,11 @@ public void swipeGestureRecognized(SwipeGesture gesture)
  
 void draw()
 {
-  background(217,228,233);
+  background(#021D40);
   
   if(noSongFound)
   {
-    fill(#000000);
+    fill(255);
     textTab("Geen songs gevonden in \n" + pathGlobal,20,20);
   }
   
@@ -209,7 +210,7 @@ void draw()
 void LeapDraw()
   {
       noFill();
-      stroke(#000000);
+      stroke(255);
 
       if(leap.getFingerList().size()==1)
       {
@@ -304,7 +305,7 @@ void showOtherScreenElements()
     }
     */
     
-    fill(#000000);
+    fill(255);
     
     try
     {
@@ -315,7 +316,7 @@ void showOtherScreenElements()
 
 	    if(!song.isPlaying())
 	    {
-	      fill(#000000);
+	      fill(255);
 	      text("Gepauzeerd",width/2-17,54);
 	    }
 	}
@@ -473,7 +474,7 @@ void getCurrentSong()
     
     if(namesFiles.length==0)
     {
-      println("Geen nummer ################");
+      println("no song ################");
       noSongFound = true;
     }
     else
@@ -504,7 +505,7 @@ void getCurrentSong()
   
   void showMeta()
   {
-    fill(#000000);
+    //fill(255);
     if(!(meta==null))
     {
     	textSize(26);
