@@ -34,10 +34,10 @@ class Button
     noStroke();
     if(img!=null)
     {
-      tint(36,92,115);  // Apply transparency without changing color
+      tint(36,92,100);  // Apply transparency without changing color
       image(img, imgX, imgY);
       //tint(255, 255);
-      tint(86, 135,140);
+      tint(86, 135,177);
     }
     else 
     {
@@ -47,12 +47,12 @@ class Button
     }
   }
   
-  boolean over()
+  boolean over(float lmx, float lmy)
   {
-    return (mouseX>x && mouseX<x+w&& mouseY>y&&mouseY<y+h);
+    return (lmx>x && lmx<x+w && lmy>y && lmy<y+h);
   }
   
-  void showMouseOver()
+  void showMouseOver(float lmx)
   {
     if(img!=null)
     {
@@ -63,19 +63,8 @@ class Button
     else 
     {
       fill(255,30);
-      rect(x,y,mouseX,h);
+      rect(x,y,lmx,h);
       fill(255);
-    }
-    
-    if(commandNumber==2)
-    {
-      fill(255,30);
-      rect(0,0,width/5,height-100);
-    }
-    else if(commandNumber==3)
-    {
-      fill(255,30);
-      rect(width-width/5,0,width/5,height-100);
     }
 
   }
